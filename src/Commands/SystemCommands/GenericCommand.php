@@ -18,35 +18,35 @@ use Longman\TelegramBot\Request;
  */
 class GenericCommand extends SystemCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var string
      */
-    protected $name = 'Generic';
-    protected $description = 'Handles generic commands or is executed by default when a command is not found';
-    protected $version = '1.0.1';
-    /**#@-*/
+    protected $name = 'generic';
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $description = 'Handles generic commands or is executed by default when a command is not found';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.0.0';
+
+    /**
+     * Command execute method
+     *
+     * @return mixed
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
-        $message = $this->getMessage();
+        //$message = $this->getMessage();
+        //$chat_id = $message->getChat()->getId();
+        //$user_id = $message->getFrom()->getId();
+        //$command = $message->getCommand();
+        //$text = trim($message->getText(true));
 
-        //You can use $command as param
-        $chat_id = $message->getChat()->getId();
-        $user_id = $message->getFrom()->getId();
-        $command = $message->getCommand();
-
-        if (in_array($user_id, $this->telegram->getAdminList()) && strtolower(substr($command, 0, 5)) == 'whois') {
-            return $this->telegram->executeCommand('whois', $this->update);
-        }
-
-        $data = [
-            'chat_id' => $chat_id,
-            'text'    => 'Command /' . $command . ' not found.. :(',
-        ];
-
-        return Request::sendMessage($data);
+        return parent::execute();
     }
 }

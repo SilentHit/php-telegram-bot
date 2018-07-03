@@ -21,23 +21,23 @@ class Conversation
     /**
      * All information fetched from the database
      *
-     * @var array
+     * @var array|null
      */
-    protected $conversation = null;
+    protected $conversation;
 
     /**
      * Notes stored inside the conversation
      *
-     * @var array
+     * @var mixed
      */
-    protected $protected_notes = null;
+    protected $protected_notes;
 
     /**
      * Notes to be stored
      *
-     * @var array
+     * @var mixed
      */
-    public $notes = null;
+    public $notes;
 
     /**
      * Telegram user id
@@ -66,6 +66,8 @@ class Conversation
      * @param int    $user_id
      * @param int    $chat_id
      * @param string $command
+     *
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function __construct($user_id, $chat_id, $command = null)
     {
@@ -87,9 +89,9 @@ class Conversation
      */
     protected function clear()
     {
-        $this->conversation = null;
+        $this->conversation    = null;
         $this->protected_notes = null;
-        $this->notes = null;
+        $this->notes           = null;
 
         return true;
     }
@@ -98,10 +100,10 @@ class Conversation
      * Load the conversation from the database
      *
      * @return bool
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     protected function load()
     {
-
         //Select an active conversation
         $conversation = ConversationDB::selectConversation($this->user_id, $this->chat_id, 1);
         if (isset($conversation[0])) {
@@ -118,7 +120,7 @@ class Conversation
 
             //Load the conversation notes
             $this->protected_notes = json_decode($this->conversation['notes'], true);
-            $this->notes = $this->protected_notes;
+            $this->notes           = $this->protected_notes;
         }
 
         return $this->exists();
@@ -138,17 +140,19 @@ class Conversation
      * Start a new conversation if the current command doesn't have one yet
      *
      * @return bool
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     protected function start()
     {
-        if (!$this->exists() && $this->command) {
-            if (ConversationDB::insertConversation(
+        if ($this->command
+            && !$this->exists()
+            && ConversationDB::insertConversation(
                 $this->user_id,
                 $this->chat_id,
                 $this->command
-            )) {
-                return $this->load();
-            }
+            )
+        ) {
+            return $this->load();
         }
 
         return false;
@@ -188,7 +192,7 @@ class Conversation
         if ($this->exists()) {
             $fields = ['status' => $status];
             $where  = [
-                'id'  => $this->conversation['id'],
+                'id'      => $this->conversation['id'],
                 'status'  => 'active',
                 'user_id' => $this->user_id,
                 'chat_id' => $this->chat_id,
@@ -211,7 +215,7 @@ class Conversation
         if ($this->exists()) {
             $fields = ['notes' => json_encode($this->notes)];
             //I can update a conversation whatever the state is
-            $where = ['id'  => $this->conversation['id']];
+            $where = ['id' => $this->conversation['id']];
             if (ConversationDB::updateConversation($fields, $where)) {
                 return true;
             }

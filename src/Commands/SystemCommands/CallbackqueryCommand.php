@@ -18,34 +18,54 @@ use Longman\TelegramBot\Request;
  */
 class CallbackqueryCommand extends SystemCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var callable[]
      */
-    protected $name = 'callbackquery';
-    protected $description = 'Reply to callback query';
-    protected $version = '1.0.0';
-    /**#@-*/
+    protected static $callbacks = [];
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $name = 'callbackquery';
+
+    /**
+     * @var string
+     */
+    protected $description = 'Reply to callback query';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.0.0';
+
+    /**
+     * Command execute method
+     *
+     * @return mixed
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
-        $update = $this->getUpdate();
-        $callback_query = $update->getCallbackQuery();
-        $callback_query_id = $callback_query->getId();
-        $callback_data = $callback_query->getData();
+        //$callback_query = $this->getUpdate()->getCallbackQuery();
+        //$user_id        = $callback_query->getFrom()->getId();
+        //$query_id       = $callback_query->getId();
+        //$query_data     = $callback_query->getData();
 
-        $data['callback_query_id'] = $callback_query_id;
-
-        if ($callback_data == 'thumb up') {
-            $data['text'] = 'Hello World!';
-            $data['show_alert'] = true;
-        } else {
-            $data['text'] = 'Hello World!';
-            $data['show_alert'] = false;
+        // Call all registered callbacks.
+        foreach (self::$callbacks as $callback) {
+            $callback($this->getUpdate()->getCallbackQuery());
         }
 
-        return Request::answerCallbackQuery($data);
+        return Request::answerCallbackQuery(['callback_query_id' => $this->getUpdate()->getCallbackQuery()->getId()]);
+    }
+
+    /**
+     * Add a new callback handler for callback queries.
+     *
+     * @param $callback
+     */
+    public static function addCallbackHandler($callback)
+    {
+        self::$callbacks[] = $callback;
     }
 }

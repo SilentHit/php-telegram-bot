@@ -11,7 +11,8 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use Longman\TelegramBot\Commands\SystemCommand;
-use Longman\TelegramBot\Entities\InlineQueryResultArticle;
+use Longman\TelegramBot\Entities\InlineQuery\InlineQueryResultArticle;
+use Longman\TelegramBot\Entities\InputMessageContent\InputTextMessageContent;
 use Longman\TelegramBot\Request;
 
 /**
@@ -19,37 +20,33 @@ use Longman\TelegramBot\Request;
  */
 class InlinequeryCommand extends SystemCommand
 {
-    /**#@+
-     * {@inheritdoc}
+    /**
+     * @var string
      */
     protected $name = 'inlinequery';
-    protected $description = 'Reply to inline query';
-    protected $version = '1.0.1';
-    /**#@-*/
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $description = 'Reply to inline query';
+
+    /**
+     * @var string
+     */
+    protected $version = '1.0.0';
+
+    /**
+     * Command execute method
+     *
+     * @return mixed
+     * @throws \Longman\TelegramBot\Exception\TelegramException
      */
     public function execute()
     {
-        $update = $this->getUpdate();
-        $inline_query = $update->getInlineQuery();
-        $query = $inline_query->getQuery();
+        //$inline_query = $this->getUpdate()->getInlineQuery();
+        //$user_id      = $inline_query->getFrom()->getId();
+        //$query        = $inline_query->getQuery();
 
-        $data = ['inline_query_id' => $inline_query->getId()];
-
-        $articles = [
-            ['id' => '001', 'title' => 'https://core.telegram.org/bots/api#answerinlinequery', 'message_text' => 'you enter: ' . $query , 'input_message_content' => [ 'message_text' => $query ] ],
-            ['id' => '002', 'title' => 'https://core.telegram.org/bots/api#answerinlinequery', 'message_text' => 'you enter: ' . $query , 'input_message_content' => [ 'message_text' => $query ] ],
-            ['id' => '003', 'title' => 'https://core.telegram.org/bots/api#answerinlinequery', 'message_text' => 'you enter: ' . $query , 'input_message_content' => [ 'message_text' => $query ] ],
-        ];
-
-        $array_article = [];
-        foreach ($articles as $article) {
-            $array_article[] = new InlineQueryResultArticle($article);
-        }
-        $data['results'] = '[' . implode(',', $array_article) . ']';
-
-        return Request::answerInlineQuery($data);
+        return Request::answerInlineQuery(['inline_query_id' => $this->getUpdate()->getInlineQuery()->getId()]);
     }
 }
